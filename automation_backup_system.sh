@@ -52,7 +52,7 @@ function showStatistic(){
 		echo -e "  |--[+] Skipped Dir   -->   $_SKIPPED_"
 		echo -e "  |--[+] Total Sizes   -->   $(du -sh $_BACKUP_FOLDER_ | awk '{printf "%s\n", $1}')"
 		echo -e "  |--[+] Total Items   -->   $(printf "%'d" $(cat $_LOG_FILE_  2> /dev/null | wc -l))"
-		echo -e "  |--[+] Success Item  -->   $_SUCCEEDED_"
+		echo -e "  |--[+] Job Success   -->   $_SUCCEEDED_"
 		echo -e "\n\n"
 
 	elif [[ $3 == 'job' ]]; then
@@ -137,6 +137,11 @@ function backup() {
 function restore() {
 
 	echo " [+] Restoring System"
+
+	if [[ $(/bin/ls $_BACKUP_FOLDER_ | grep 'tar.gz' | wc -l) -eq 0 ]]; then
+		printf "  |--[+] %s Empty\n" "$_BACKUP_FOLDER_"
+	fi
+
 	for compress in $(/bin/ls $_BACKUP_FOLDER_ | grep 'tar.gz'); do
 
 		_start_job_=$(date +%s)
