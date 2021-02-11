@@ -8,7 +8,7 @@ _BACKUP_FOLDER_='/SYSTEM_BACKUP'
 # _FOLDERS_=( "tmp" "var" ) # Uncomment this block if you want backup custom dir / file path instead of default (backup /)
 _SKIPPED_=0
 _SUCCEEDED_=0
-_VERSION_="v1.0.1"
+_VERSION_="v1.0.2"
 _EXCLUDE_PATH_FILE_="exclude.txt"
 _LOG_FILE_="output.log"
 
@@ -23,6 +23,7 @@ _EXCLUDE_LIST_="/boot
 	           /etc/mtab
 	           /etc/mdadm.conf
 	           /etc/sysconfig/network*
+	           /etc/network/interfaces
 	           /var/spool/asterisk/monitor
 	           $(pwd)/$_LOG_FILE_
 	           $_BACKUP_FOLDER_"
@@ -147,7 +148,6 @@ function restore() {
 		_start_job_=$(date +%s)
 		compress_clear=$(echo $compress | awk -F '.' '{printf "%s", $1}')
 		_date_=$(echo "[ $compress_clear ] --- `date '+%d-%b-%y %H:%M:%S'`")
-		# compress=$(echo $compress | awk -F '.' '{printf "%s", $1}')
 
 		printf "  |--[+] Restore "
 		printf "%-29s" "$compress_clear*" | sed 's/ /./g' | sed 's/*/ /g'
