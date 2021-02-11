@@ -8,7 +8,7 @@ _BACKUP_FOLDER_='/SYSTEM_BACKUP'
 # _FOLDERS_=( "tmp" "var" ) # Uncomment this block if you want backup custom dir / file path instead of default (backup /)
 _SKIPPED_=0
 _SUCCEEDED_=0
-_VERSION_="v1.0.0"
+_VERSION_="v1.0.1"
 _EXCLUDE_PATH_FILE_="exclude.txt"
 _LOG_FILE_="output.log"
 
@@ -28,14 +28,6 @@ _EXCLUDE_LIST_="/boot
 	           $_BACKUP_FOLDER_"
 
 # =========================================
-
-# Check User, Exit if user not root
-if [[ "$EUID" -ne 0 ]]
-	then 
-		scriptHelper
-		exit
-fi
-
 
 # Function for check return code and show execution time
 function check(){
@@ -167,10 +159,17 @@ function restore() {
 
 clear
 echo -e " \t == Full Auto Backup System | $_VERSION_ ==\n\n"
-provision
+
+# Check User, Exit if user not root
+if [[ "$EUID" -ne 0 ]]
+	then 
+		scriptHelper
+		exit
+fi
 
 if [[ $1 == 'backup' ]]; then
 
+	provision
 	_start_script_=$(date +%s)
 	backup
 	_end_script_=$(date +%s)
@@ -179,6 +178,7 @@ if [[ $1 == 'backup' ]]; then
 
 elif [[ $1 == 'restore' ]]; then
 	
+	provision
 	_start_script_=$(date +%s)
 	restore
 	_end_script_=$(date +%s)
