@@ -8,7 +8,7 @@ _BACKUP_FOLDER_='/SYSTEM_BACKUP'
 # _FOLDERS_=( "tmp" "var" ) # Uncomment this block if you want backup custom dir / file path instead of default (backup /)
 _SKIPPED_=0
 _SUCCEEDED_=0
-_VERSION_="v1.1.0"
+_VERSION_="v1.1.1"
 _EXCLUDE_PATH_FILE_="exclude.txt"
 _LOG_FILE_="output.log"
 
@@ -53,7 +53,7 @@ function checkSum(){
 		check_hash=$(md5sum $1 | awk '{print $1}')
 
 		if [[ $parsed_hash == $check_hash ]]; then
-			return 1
+			return 0
 		else
 			return 1
 		fi
@@ -136,11 +136,11 @@ function backup() {
 
 			tar --exclude-from="$(pwd)/$_EXCLUDE_PATH_FILE_" -czvPf "$_BACKUP_FOLDER_$folder.tar.gz.$(date '+%d_%b_%y')" $folder 2>&1 | awk -v date="$_date_" '{ printf "%s |-----> backup %s\n", date, $0 }' >> $_LOG_FILE_ 2>&1
 			check
+
+			checkSum  "$_BACKUP_FOLDER_$folder.tar.gz.$(date '+%d_%b_%y')" "backup"
 			
 			_end_job_=$(date +%s)
-			
 			showStatistic $_start_job_ $_end_job_ 'job' $folder
-			checkSum  "$_BACKUP_FOLDER_$folder.tar.gz.$(date '+%d_%b_%y')" "backup"
 
 
 		else
