@@ -78,7 +78,7 @@ function showStatistic(){
 
 	elif [[ $3 == 'job' ]]; then
 		_runtime_job_=$(($2-$1))
-		_total_item_=$(printf "%'d" $(cat $_LOG_FILE_ 2> /dev/null | grep -E '^\[ '+$4+' \]*' | wc -l))
+		_total_item_=$(printf "%'d" $(cat $_LOG_FILE_ 2> /dev/null | grep -wE '(restore|backup) '+$4'' | wc -l))
 		printf "    %7s item ( %3s s )\n" "$_total_item_" "$_runtime_job_"
 	fi
 }
@@ -166,7 +166,7 @@ function restore() {
 	for compress in $(/bin/ls $_BACKUP_FOLDER_ | grep 'tar.gz'); do
 
 		_start_job_=$(date +%s)
-		compress_clear=$(echo $compress | awk -F '.' '{printf "%s", $1}')
+		compress_clear=$(echo $compress | awk -F '.' '{printf "/%s", $1}')
 		_date_=$(echo "[ $compress_clear ] --- `date '+%d-%b-%y %H:%M:%S'`")
 
 		printf "  |--[+] Restore "
