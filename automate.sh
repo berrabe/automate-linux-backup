@@ -32,7 +32,7 @@ _EXCLUDE_LIST_="/boot
 
 # Function for check return code and show execution time
 function check(){
-	if [[ $? -eq 0 ]]; then
+	if [[ $? -eq 0 && ${PIPESTATUS[0]} -eq 0 ]]; then
 		echo -ne " [ Success ]"
 		_SUCCEEDED_=$((_SUCCEEDED_+1))
 	else
