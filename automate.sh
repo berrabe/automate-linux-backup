@@ -8,7 +8,7 @@ _BACKUP_FOLDER_='/SYSTEM_BACKUP'
 # _FOLDERS_=( "tmp" "var" ) # Uncomment this block if you want backup custom dir / file path instead of default (backup /)
 _SKIPPED_=0
 _SUCCEEDED_=0
-_VERSION_="v1.0.2"
+_VERSION_="v1.1.0"
 _EXCLUDE_PATH_FILE_="exclude.txt"
 _LOG_FILE_="output.log"
 
@@ -37,6 +37,26 @@ function check(){
 		_SUCCEEDED_=$((_SUCCEEDED_+1))
 	else
 		echo -ne " [ Failed ]"
+	fi
+}
+
+
+function checkSum(){
+
+	if [[ $2 == 'backup' ]]; then
+
+		hash=$(md5sum $1 | awk '{print $1}')
+		mv $1 "$1.$hash"
+
+	elif [[ $2 == 'restore' ]]; then
+		parsed_hash=$(echo $1 | awk -F '.' '{print $NF}')
+		check_hash=$(md5sum $1 | awk '{print $1}')
+
+		if [[ $parsed_hash == $check_hash ]]; then
+			return 1
+		else
+			return 1
+		fi
 	fi
 }
 
@@ -77,7 +97,7 @@ function provision(){
 	if [[ ! -d "$_BACKUP_FOLDER_" ]]; then
 		printf "**|--[+]*%-37s" "Creating*Backup*Dir*" | sed 's/ /./g' | sed 's/*/ /g'
 		mkdir $_BACKUP_FOLDER_ > /dev/null 2>&1
-		check;
+		check; echo ""
 	fi
 
 	echo -e "\n"
@@ -120,6 +140,8 @@ function backup() {
 			_end_job_=$(date +%s)
 			
 			showStatistic $_start_job_ $_end_job_ 'job' $folder
+			checkSum  "$_BACKUP_FOLDER_$folder.tar.gz.$(date '+%d_%b_%y')" "backup"
+
 
 		else
 
@@ -128,8 +150,6 @@ function backup() {
 			continue
 
 		fi
-
-		sleep 1
 
 	done
 }
@@ -151,6 +171,12 @@ function restore() {
 
 		printf "  |--[+] Restore "
 		printf "%-29s" "$compress_clear*" | sed 's/ /./g' | sed 's/*/ /g'
+
+		checkSum "$_BACKUP_FOLDER_/$compress" "restore"
+		if [[ $? -ne 0 ]]; then
+			echo " [ Checksum Error ]"
+			continue
+		fi
 
 		tar -xzvPf "$_BACKUP_FOLDER_/$compress" 2>&1 | awk -v date="$_date_" '{ printf "%s |-----> restore %s\n", date, $0 }' >> $_LOG_FILE_ 2>&1
 		check
