@@ -8,7 +8,7 @@ _BACKUP_FOLDER_='/SYSTEM_BACKUP'
 # _FOLDERS_=( "tmp" "var" ) # Uncomment this block if you want backup custom dir / file path instead of default (backup /)
 _SKIPPED_=0
 _SUCCEEDED_=0
-_VERSION_="v1.1.1"
+_VERSION_="v1.2.0"
 _EXCLUDE_PATH_FILE_="exclude.txt"
 _LOG_FILE_="output.log"
 
@@ -30,13 +30,22 @@ _EXCLUDE_LIST_="/boot
 
 # =========================================
 
+# List of Colors
+Light_Red="\033[1;31m"
+Light_Green="\033[1;32m"
+Yellow="\033[1;33m"
+Light_Blue="\033[1;34m"
+Light_Purple="\033[1;35m"
+Light_Cyan="\033[1;36m"
+NoColor="\033[0m"
+
 # Function for check return code and show execution time
 function check(){
 	if [[ $? -eq 0 && ${PIPESTATUS[0]} -eq 0 ]]; then
-		echo -ne " [ Success ]"
+		echo -ne "${Light_Green} [ Success ]${NoColor}"
 		_SUCCEEDED_=$((_SUCCEEDED_+1))
 	else
-		echo -ne " [ Failed ]"
+		echo -ne "${Light_Red} [ Failed  ]${NoColor}"
 	fi
 }
 
@@ -68,7 +77,7 @@ function showStatistic(){
 		_runtime_script_=$(($2-$1))
 		hours=$((_runtime_script_ / 3600)); minutes=$(( (_runtime_script_ % 3600) / 60 )); seconds=$(( (_runtime_script_ % 3600) % 60 ))
 
-		echo -e "\n\n [+] Overall Stats"
+		echo -e "\n\n${Light_Cyan} [+] Overall Stats ${NoColor}"
 		echo -e "  |--[+] Backup Time   -->   $hours : $minutes : $seconds"
 		echo -e "  |--[+] Skipped Dir   -->   $_SKIPPED_"
 		echo -e "  |--[+] Total Sizes   -->   $(du -sh $_BACKUP_FOLDER_ | awk '{printf "%s\n", $1}')"
@@ -78,13 +87,23 @@ function showStatistic(){
 
 	elif [[ $3 == 'job' ]]; then
 		_runtime_job_=$(($2-$1))
-		_total_item_=$(printf "%'d" $(cat $_LOG_FILE_ 2> /dev/null | grep -wE '(restore|backup) '+$4'' | wc -l))
-		printf "    %7s item ( %3s s )\n" "$_total_item_" "$_runtime_job_"
+		_total_item_=$(cat $_LOG_FILE_ 2> /dev/null | grep -wE '(restore|backup) '+$4'' | wc -l)
+		_total_item_parsed_=$(printf "%'d" $_total_item_)
+
+		if [[ $_total_item_ -ge 100 && $_total_item_ -le 500 ]]; then
+			printf "${Yellow}    %7s item ( %3s s )\n${NoColor}" "$_total_item_parsed_" "$_runtime_job_"
+		elif [[ $_total_item_ -ge 500 && $_total_item_ -le 5000 ]]; then
+			printf "${Light_Blue}    %7s item ( %3s s )\n${NoColor}" "$_total_item_parsed_" "$_runtime_job_"
+		elif [[ $_total_item_ -ge 5000 ]]; then
+			printf "${Light_Purple}    %7s item ( %3s s )\n${NoColor}" "$_total_item_parsed_" "$_runtime_job_"
+		else
+			printf "    %7s item ( %3s s )\n" "$_total_item_parsed_" "$_runtime_job_"
+		fi
 	fi
 }
 
 function provision(){
-	echo " [+] Provisioning"
+	echo -e "${Light_Cyan} [+] Provisioning ${NoColor}"
 	printf "**|--[+]*%-37s" "Removing*Log*Files*" | sed 's/ /./g' | sed 's/*/ /g'
 	rm $_LOG_FILE_ > /dev/null 2>&1
 	check; echo ""
@@ -106,7 +125,7 @@ function provision(){
 
 # Function for show help page
 function scriptHelper(){
-	echo -e " [!] Ouch, Make Sure You Have"
+	echo -e "${Light_Red} [!] Ouch, Make Sure You Have ${NoColor}"
 	echo -e "  |--[!] Run This Script As Root"
 	echo -e "  |--[!] Provide Valid Script Parameters [ backup / restore ]"
 
@@ -116,7 +135,7 @@ function scriptHelper(){
 
 function backup() {
 
-	echo " [+] Backuping System"
+	echo -e "${Light_Cyan} [+] Backuping System ${NoColor}"
 	for folder in $(/bin/ls /); do 
 	# for folder in "${_FOLDERS_[@]}"; do # Uncomment this block if you want backup custom dir / file path instead of default (backup /)
 
@@ -157,7 +176,7 @@ function backup() {
 
 function restore() {
 
-	echo " [+] Restoring System"
+	echo -e "${Light_Cyan} [+] Restoring System ${NoColor}"
 
 	if [[ $(/bin/ls $_BACKUP_FOLDER_ | grep 'tar.gz' | wc -l) -eq 0 ]]; then
 		printf "  |--[+] %s Empty\n" "$_BACKUP_FOLDER_"
@@ -174,7 +193,7 @@ function restore() {
 
 		checkSum "$_BACKUP_FOLDER_/$compress" "restore"
 		if [[ $? -ne 0 ]]; then
-			echo " [ Checksum Error ]"
+			echo "${Light_Red} [ Checksum Error ]${NoColor}"
 			continue
 		fi
 
@@ -189,7 +208,7 @@ function restore() {
 
 
 clear
-echo -e " \t == Full Auto Backup System | $_VERSION_ ==\n\n"
+echo -e " \t == Automate Backup System | $_VERSION_ ==\n\n"
 
 # Check User, Exit if user not root
 if [[ "$EUID" -ne 0 ]]
