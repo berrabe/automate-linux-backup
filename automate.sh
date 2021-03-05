@@ -81,8 +81,9 @@ function showStatistic(){
 		echo -e "  |--[+] Backup Time   -->   $hours : $minutes : $seconds"
 		echo -e "  |--[+] Skipped Dir   -->   $_SKIPPED_"
 		echo -e "  |--[+] Total Sizes   -->   $(du -sh $_BACKUP_FOLDER_ | awk '{printf "%s\n", $1}')"
-		echo -e "  |--[+] Total Items   -->   $(printf "%'d" $(cat $_LOG_FILE_  2> /dev/null | wc -l))"
+		echo -e "  |--[+] Total Items   -->   $(printf "%'d" $(cat $_LOG_FILE_  2> /dev/null | grep -wE '(backup|restore) /' | wc -l))"
 		echo -e "  |--[+] Job Success   -->   $_SUCCEEDED_"
+		echo -e "  |--[+] Warn / Err    -->   $(printf "%'d" $(cat $_LOG_FILE_  2> /dev/null | grep -vE '(backup|restore) /' | wc -l))"
 		echo -e "\n\n"
 
 	elif [[ $3 == 'job' ]]; then
