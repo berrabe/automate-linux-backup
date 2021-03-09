@@ -9,7 +9,7 @@
 when doing a linux system backup it sometimes takes a very long time, which usually takes a whole VM back up (if using virtualization).
 That's why this script was created, which will only backup the important filesystem partitions and compress them into small files.
 
-This script has been tested on CentOS linux and Debian Based System
+This script has been tested on CentOS, Debian and Arch Based System
 
 <br/><br/>
 
