@@ -151,10 +151,10 @@ function backup() {
 		grep -qE "^$folder$" $_EXCLUDE_PATH_FILE_
 		if [[ $? -ne 0 ]]; then
 
-			_date_=$(echo "[ $folder ] --- `date '+%d-%b-%y %H:%M:%S'`")
+			_item_=$(echo "[ $folder ] ---")
 			_start_job_=$(date +%s)
 
-			tar --exclude-from="$(pwd)/$_EXCLUDE_PATH_FILE_" -czvPf "$_BACKUP_FOLDER_$folder.tar.gz.$(date '+%d_%b_%y')" $folder 2>&1 | awk -v date="$_date_" '{ printf "%s |-----> backup %s\n", date, $0 }' >> $_LOG_FILE_ 2>&1
+			tar --exclude-from="$(pwd)/$_EXCLUDE_PATH_FILE_" -czvPf "$_BACKUP_FOLDER_$folder.tar.gz.$(date '+%d_%b_%y')" $folder 2>&1 | awk -v item="$_item_" '{ printf "%s %s |-----> backup %s\n", item, strftime("%d-%b-%y %H:%M:%S"), $0 }' >> $_LOG_FILE_ 2>&1
 			check
 
 			checkSum  "$_BACKUP_FOLDER_$folder.tar.gz.$(date '+%d_%b_%y')" "backup"
@@ -187,7 +187,7 @@ function restore() {
 
 		_start_job_=$(date +%s)
 		compress_clear=$(echo $compress | awk -F '.' '{printf "/%s", $1}')
-		_date_=$(echo "[ $compress_clear ] --- `date '+%d-%b-%y %H:%M:%S'`")
+		_item_=$(echo "[ $compress_clear ] ---")
 
 		printf "  |--[+] Restore "
 		printf "%-29s" "$compress_clear*" | sed 's/ /./g' | sed 's/*/ /g'
@@ -198,7 +198,7 @@ function restore() {
 			continue
 		fi
 
-		tar -xzvPf "$_BACKUP_FOLDER_/$compress" 2>&1 | awk -v date="$_date_" '{ printf "%s |-----> restore %s\n", date, $0 }' >> $_LOG_FILE_ 2>&1
+		tar -xzvPf "$_BACKUP_FOLDER_/$compress" 2>&1 | awk -v item="$_item_" '{ printf "%s %s |-----> restore %s\n", item, strftime("%d-%b-%y %H:%M:%S"), $0 }' >> $_LOG_FILE_ 2>&1
 		check
 
 		_end_job_=$(date +%s)
